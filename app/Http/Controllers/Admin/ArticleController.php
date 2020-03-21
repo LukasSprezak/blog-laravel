@@ -6,14 +6,14 @@ use App\Model\Article;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 
 class ArticleController extends Controller
 {
     public function __construct()
     {
-       // $this->authorize('administerArticle');
         $this->middleware('auth');
-    //    $this->middleware('can:administerArticle');
+        $this->middleware('can:administerArticle');
     }
 
     /**
@@ -50,11 +50,19 @@ class ArticleController extends Controller
         */
         $data = $request->validate([
             'title'   => 'required|max:255',
-            'content' => 'nullable'
+            'content' => 'nullable',
+            'imageName' => 'nullable|image|mimes:jpg,jpeg,png|max:1024'
 
         ]);
+
+        if (isset($data['imageName'])) {
+            $path = $request->file('imageName')->store('article_image');
+            $data['imageName'] = $path;
+        }
+
         $data['user_id'] = $request->user()->id;
         $article = Article::create($data);
+
         session()->flash('message', "Success add article");
         return redirect(route('single.article', $article->slug));
     }
@@ -73,13 +81,16 @@ class ArticleController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param Request $request
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         $article = Article::whereId($id)->first();
         if(is_null($article)) return abort(404);
+
+
         return view('admin.article.edit', compact('article'));
     }
 
@@ -94,7 +105,21 @@ class ArticleController extends Controller
     {
         $article = Article::whereId($id)->first();
         if(is_null($article)) return abort(404);
-        $article->update($article);
+
+        $oldImage = $article->image;
+
+        if (isset($data['imageName'])) {
+            $path = $request->file('imageName')->store('article_image');
+            $data['imageName'] = $path;
+        }
+
+        $article->update($data);
+
+        if (isset($data['image'])) {
+            Storage::delete($oldImage);
+        }
+
+        return back()->with('message', 'Post has been updated!');
     }
 
     /**
