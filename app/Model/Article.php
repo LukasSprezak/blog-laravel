@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Model;
 
+use App\ProductPhotos;
 use Illuminate\{Database\Eloquent\Model, Support\Str};
 
 class Article extends Model
@@ -47,7 +48,16 @@ class Article extends Model
         return $query->where('enabled', 1);
     }
 
+    public function photos()
+    {
+        return $this->hasMany(ArticlePhotos::class);
+    }
+
+    public function firstPhoto() {
+        return $this->photos->first();
+    }
+
     protected $guarded = [];
 
-    protected $fillable = ['title', 'content'];
+    protected $fillable = ['user_id', 'title', 'enabled', 'content', 'imageName', 'order'];
 }

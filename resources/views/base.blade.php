@@ -101,6 +101,49 @@
     });
 
 </script>
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#formTable #sortThis').sortable({
+            update: function (event, ui) {
+                $(this).children().each(function (index) {
+                    if ($(this).attr('data-position') != (index+1)) {
+                        $(this).attr('data-position', (index+1)).addClass('updated');
+                    }
+                });
+
+                saveNewPositions();
+            }
+        });
+    });
+
+</script>
+<script type="text/javascript">
+    function saveNewPositions() {
+        var positions = [];
+        $('.updated').each(function () {
+            positions.push([$(this).attr('data-index'), $(this).attr('data-position')]);
+            $(this).removeClass('updated');
+        });
+
+        $.ajax({
+            url: '{{ route('position_update_posts') }}',
+            method: 'PUT',
+            dataType: 'text',
+            data: {
+                updated: 1,
+                positions: positions,
+                _token: '{{csrf_token()}}'
+            }, success: function (response) {
+                console.log(response);
+            },error: function (data, textStatus, errorThrown) {
+                console.log(data);
+            },
+        });
+    }
+</script>
 @auth
 <form method="POST" action="{{ route('logout') }}" id="logoutForm">@csrf</form>
 <script>

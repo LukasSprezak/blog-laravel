@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\AddProductPhoto;
 use App\Model\Article;
+use App\Model\ArticlePhotos;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
+use File;
+
 
 class ArticleController extends Controller
 {
@@ -134,5 +138,43 @@ class ArticleController extends Controller
         if(is_null($article)) return abort(404);
         $article->delete();
         return redirect('/');
+    }
+
+    public function addPhoto($product_id, AddProductPhoto $request) {
+        $photo = $request->file('photo');
+        $filename = uniqid() . '.' . $photo->getClientOriginalExtension();
+
+        $product = Article::findOrFail($product_id);
+        $product->photos()->create([
+            'photo' => $filename,
+        ]);
+
+        Storage::disk('public')->putFileAs(
+            'article/',
+            $photo,
+            $filename
+        );
+
+        return back()->with([
+            'status' => [
+                'type' => 'success',
+                'content' => 'Zdjęcie zostało dodane',
+            ]
+        ]);
+    }
+
+    public function deletePhoto($article_id, $photo_id) {
+        $photo = ArticlePhotos::where('article_id', $article_id)->findOrFail($photo_id);
+
+        File::delete('article/' . $photo->photo);
+
+        $photo->delete();
+
+        return back()->with([
+            'status' => [
+                'type' => 'success',
+                'content' => 'Zdjęcie zostało usunięte',
+            ]
+        ]);
     }
 }

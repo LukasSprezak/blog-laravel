@@ -23,6 +23,9 @@ Route::group(['prefix' => '/admin', 'middleware' => ['can:administerArticle']], 
     Route::get('/article/{id}', 'Admin\ArticleController@edit')->name('admin.article.edit');
     Route::put('/article/{id}', 'Admin\ArticleController@update');
     Route::delete('/article/{id}', 'Admin\ArticleController@delete')->name('admin.article.delete');
+
+    Route::post('/article/{id}/add-photo', 'Admin\ArticleController@addPhoto')->name('addPhoto');
+    Route::get('/{id}/delete-photo/{photo}', 'Admin\ArticleController@deletePhoto')->name('deletePhoto');
 });
 
 /* UI */
@@ -55,3 +58,6 @@ Route::get('login/facebook/callback', 'Auth\LoginController@handleProviderCallba
 
 Route::get('/sort','UI\SortController@showDatatable');
 Route::post('/sort','UI\SortController@updateOrder');
+
+Route::get('/position_update_posts','UI\PostController@showSort')->name('position_update_posts');
+Route::put('/position_update_posts','UI\PostController@position_update')->name('position_update_posts');

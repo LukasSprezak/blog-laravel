@@ -16,7 +16,7 @@ class CreateArticlesTable extends Migration
             $table->text('content')->nullable($value = true);
             $table->boolean('enabled')->default(0);
          //   $table->enum('status', ['publish', 'unpublished', 'draft'])->default('draft');
-            $table->string('imageName')->nullable($value = true);
+            $table->string('imageName')->nullable();
             $table->timestamps();
         });
     }
